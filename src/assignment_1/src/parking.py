@@ -13,17 +13,20 @@ import numpy as np
 import math
 import rospy
 from xycar_msgs.msg import xycar_motor
+import math_ext
 
 #=============================================
 # 모터 토픽을 발행할 것임을 선언
-#============================================= 
+#=============================================
 motor_pub = rospy.Publisher('xycar_motor', xycar_motor, queue_size=1)
 xycar_msg = xycar_motor()
 
 #=============================================
 # 프로그램에서 사용할 변수, 저장공간 선언부
-#============================================= 
+#=============================================
 rx, ry = [300, 350, 400, 450], [300, 350, 400, 450]
+n = 0 # 점의 개수
+i = 0 # 지금 몇 번째 점에 있는지
 
 #=============================================
 # 프로그램에서 사용할 상수 선언부
@@ -49,9 +52,16 @@ def drive(angle, speed):
 # 경로를 리스트를 생성하여 반환한다.
 #=============================================
 def planning(sx, sy, syaw, max_acceleration, dt):
-    global rx, ry
-    print("Start Planning")
-
+    global rx, ry, n, i
+    P0 = [sx, sy] # 출발 지점
+    P1 = [sx + math.cos(syaw), sy + math.sin(syaw)] # 출발 시 바라보는 방향으로 갈 수 있도록 베지어 좌표 1 설정
+    P2 = [*P_ENTRY] # 도착 지점 시작
+    P3 = [*P_END] # 도착 지점 종료
+    P = np.array([P0, P1, P2, P3])
+    n = 1000
+    i = 0
+    curves = math_ext.bezier_curve(P, np.linspace(0, 1, n))
+    rx, ry = curves[:,0], curves[:,1]
     return rx, ry
 
 #=============================================
@@ -61,9 +71,12 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 # 각도와 속도를 결정하여 주행한다.
 #=============================================
 def tracking(screen, x, y, yaw, velocity, max_acceleration, dt):
-    global rx, ry
-    angle = 50 # -50 ~ 50
-    speed = 50 # -50 ~ 50
-    
+    global rx, ry, n, i
+    if i == n:
+        angle = yaw
+        speed = 0
+    else:
+        i += 1
+        angle = np.arctan((ry[i]-y)/(rx[i]-x))
+        speed = np.linalg.norm([rx[i]-x, ry[i]-y])
     drive(angle, speed)
-
