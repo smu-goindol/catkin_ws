@@ -72,11 +72,9 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 #=============================================
 def tracking(screen, x, y, yaw, velocity, max_acceleration, dt):
     global rx, ry, n, i
-    if i == n:
-        angle = yaw
-        speed = 0
-    else:
-        i += 1
-        angle = np.arctan((ry[i]-y)/(rx[i]-x))
-        speed = np.linalg.norm([rx[i]-x, ry[i]-y])
-    drive(angle, speed)
+    for i in range(n):
+        while (d := np.linalg.norm([rx[i]-x, ry[i]-y])) > 1:
+            yaw_hat = np.arctan((ry[i]-y)/(rx[i]-x))
+            angle = yaw_hat - yaw
+            speed = d
+            drive(angle, speed)
