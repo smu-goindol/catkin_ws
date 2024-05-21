@@ -2,14 +2,15 @@ import numpy as np
 import math
 
 
-def bezier_curve(P, T):
+def bezier_curve(P, num_points=1000):
     """
     Calculate the Bezier curve for given control points P and parameters T.
     P: Control points, a (N, 2) numpy array
-    T: Parameters, a (M,) numpy array
+    num_points: Number of points to sample on the curve
     Returns:
     curve_points: A (M, 2) numpy array of points on the Bezier curve
     """
+    T = np.linspace(0, 1, num_points)
     N = P.shape[0] - 1  # Degree of the Bezier curve (number of control points - 1)
     M = T.shape[0]  # Number of parameter values
 
