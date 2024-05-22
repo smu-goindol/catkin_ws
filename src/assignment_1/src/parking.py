@@ -58,9 +58,9 @@ def planning(sx, sy, syaw, max_acceleration, dt):
     P2 = [*P_ENTRY] # 도착 지점 시작
     P3 = [*P_END] # 도착 지점 종료
     P = np.array([P0, P1, P2, P3])
-    n = 20
+    n = 1000
     i = 0
-    curves = math_ext.bezier_curve(P, np.linspace(0, 1, n))
+    curves = math_ext.bezier_curve(P, n)
     rx, ry = curves[:,0], curves[:,1]
     return rx, ry
 
@@ -72,14 +72,4 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 #=============================================
 def tracking(screen, x, y, yaw, velocity, max_acceleration, dt):
     global rx, ry, n, i
-    print(f'{i+1}-th iteration')
-    angle = yaw
-    speed = 0
-    if (d := np.linalg.norm([rx[i]-x, ry[i]-y])) > 1:
-        yaw_hat = np.arctan((ry[i]-y)/(rx[i]-x))
-        angle = yaw_hat - yaw
-        speed = d
-        print(f'    angle: {angle:04.2f} speed: {speed}')
-    else:
-        i += 1
-    drive(angle, speed)
+    drive(angle=yaw, speed=4)
