@@ -6,7 +6,6 @@ export ROS_HOSTNAME=localhost
 cd $CATKIN_DIR
 
 source /opt/ros/noetic/setup.bash
-source ./devel/setup.bash
-
 catkin_make
+source ./devel/setup.bash
 roslaunch assignment_1 parking.launch
