@@ -13,7 +13,10 @@ def calc_yaw(p1: Point, p2: Point) -> float:
     return math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
 
 def yaw2angle(yaw: float) -> float:
-    return (yaw + 90) % 360
+    yaw = (yaw + 90) % 360
+    if yaw > 180:
+        yaw -= 360
+    return yaw
 
 def angle2yaw(angle: float) -> float:
     return (angle - 90) % 360
