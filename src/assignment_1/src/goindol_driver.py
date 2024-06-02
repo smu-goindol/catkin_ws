@@ -52,10 +52,10 @@ class CarDriver:
 
         if len(self.queue) == 0:
             # 경로가 끝났을 때
-            return CarNextStatus(*self.plan.end_pos)
+            return CarNextStatus(Car(*self.plan.end_pos))
 
         # 다음 점까지 점진적으로 수렴시켜보자
-        next_status = CarNextStatus(*self.queue[0])
+        next_status = CarNextStatus(Car(*self.queue[0]))
         while True:
             spos = status.car.point
             epos = self.queue[0]
@@ -63,6 +63,10 @@ class CarDriver:
             dist = calc_dist(spos, epos)
             yaw = calc_yaw(spos, epos)
             speed = dist / status.dt
+
+            next_status.car.x = status.car.x + speed * math.cos(math.radians(yaw)) * status.dt
+            next_status.car.y = status.car.y + speed * math.sin(math.radians(yaw)) * status.dt
+            next_status.car.yaw = yaw
 
             next_status.angle = yaw2angle(status.car.yaw - yaw)
             next_status.speed = min(status.max_velocity, speed)
