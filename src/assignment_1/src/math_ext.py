@@ -35,8 +35,7 @@ def bezier_curve_length(P, num_points=1000):
     length: Approximate length of the Bezier curve
     """
     # Sample points on the Bezier curve
-    T = np.linspace(0, 1, num_points)
-    curve_points = bezier_curve(P, T)
+    curve_points = bezier_curve(P, num_points)
 
     # Compute the distance between successive points
     distances = np.sqrt(np.sum(np.diff(curve_points, axis=0)**2, axis=1))
