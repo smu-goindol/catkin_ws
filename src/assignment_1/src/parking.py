@@ -51,7 +51,8 @@ def drive(angle, speed):
 #=============================================
 def planning(sx, sy, syaw, max_acceleration, dt):
     global goindol_car_driver
-    goindol_car_driver = CarDriver((sx, sy), syaw, P_ENTRY, calc_yaw(P_END, P_ENTRY))
+
+    goindol_car_driver = CarDriver(Car(sx, sy, syaw), P_ENTRY, P_END)
 
     path = goindol_car_driver.plan.path
     return path[:0], path[:1]

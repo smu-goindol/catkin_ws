@@ -17,9 +17,9 @@ class CarDriver:
     plan: PathPlan
     queue: deque
 
-    def __init__(self, car: Car, end_pos: Point, end_yaw: float):
-        self.end_pos = end_pos
-        self.end_yaw = end_yaw
+    def __init__(self, car: Car, parking_entry: Point, parking_end: Point):
+        self.end_pos = parking_entry
+        self.end_yaw = calc_yaw(parking_end, parking_entry)
         self.dist_epsilon = 10 # 이 거리 안에 들어오면 다음 점으로 넘어감
         self.plan_for(car)
 
