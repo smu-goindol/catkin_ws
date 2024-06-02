@@ -71,6 +71,10 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
     global queue
 
+    if distance(pos, P_END)>5:
+        drive(angle=0,speed=0)
+        return
+    
     if not queue:
         drive(angle=0, speed=0)
         return
@@ -137,3 +141,6 @@ def calc_dist(p0: tuple, p1: tuple) -> float:
 
 def parking_line(x: float) -> float:
     return -x + 1198
+
+def distance(p0: tuple, p1: tuple) -> float:
+    return ((p0[0]-p1[0])**2+(p0[1]-p1[1])**2)**0.5
