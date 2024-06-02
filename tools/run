@@ -7,4 +7,7 @@ cd $CATKIN_DIR
 
 source /opt/ros/noetic/setup.bash
 source ./devel/setup.bash
+
+git pull
+
 roslaunch assignment_1 parking.launch
