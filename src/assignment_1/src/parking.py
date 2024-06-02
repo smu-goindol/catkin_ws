@@ -11,7 +11,7 @@
 import pygame
 import numpy as np
 import math
-import rospy
+import rospy # type: ignore
 from xycar_msgs.msg import xycar_motor
 import math_ext
 
