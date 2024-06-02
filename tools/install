@@ -1,6 +1,6 @@
 CATKIN_DIR=/root/catkin_ws
 
-apt install -y curl git lsb_release python3-pip
+apt install -y curl git lsb-release python3-pip
 
 git clone https://github.com/smu-goindol/catkin_ws.git $CATKIN_DIR
 
