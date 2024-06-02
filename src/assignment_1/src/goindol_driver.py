@@ -56,29 +56,31 @@ class CarDriver:
 
         # 다음 점까지 점진적으로 수렴시켜보자
         next_status = CarNextStatus(Car(*self.queue[0]))
-        while True:
-            spos = status.car.point
-            epos = self.queue[0]
 
-            dist = calc_dist(spos, epos)
-            yaw = calc_yaw(spos, epos)
-            speed = dist / status.dt
+        spos = status.car.point
+        epos = self.queue[0]
 
-            next_status.car.x = status.car.x + speed * math.cos(math.radians(yaw)) * status.dt
-            next_status.car.y = status.car.y + speed * math.sin(math.radians(yaw)) * status.dt
-            next_status.car.yaw = yaw
+        dist = calc_dist(spos, epos)
+        yaw = calc_yaw(spos, epos)
+        speed = dist / status.dt
 
-            next_status.angle = yaw2angle(status.car.yaw - yaw)
-            next_status.speed = min(status.max_velocity, speed)
+        next_status.car.x = status.car.x + speed * math.cos(math.radians(yaw)) * status.dt
+        next_status.car.y = status.car.y + speed * math.sin(math.radians(yaw)) * status.dt
+        next_status.car.yaw = yaw
 
-            print(f'planned to go {next_status.angle:.2f} degrees, {next_status.speed:.2f} speed.')
+        next_status.angle = yaw2angle(status.car.yaw - yaw)
+        next_status.speed = min(status.max_velocity, speed)
 
-            if abs(next_status.angle) >= 90:
-                # 90도 이상 핸들을 꺾을 수 없으므로, 다시 경로를 갱신.
-                self.plan_for(status.car)
-            else:
-                # 이대로면 충분히 진행 가능하다.
-                break
+        print(f'planned to go {next_status.angle:.2f} degrees, {next_status.speed:.2f} speed.')
+
+        if calc_dist(spos, self.end_pos) < self.dist_epsilon:
+            # 주차라인에 도착했을 때
+            next_status.speed = 0
+
+        elif abs(next_status.angle) >= 90:
+            # 90도 이상 핸들을 꺾을 수 없으므로, 다시 경로를 갱신할 준비.
+            self.plan_for(status.car)
+            next_status.speed = 0
 
         # 다음 점으로 가기위한 상태를 반환한다.
         return next_status
