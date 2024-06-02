@@ -69,14 +69,14 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 # 각도와 속도를 결정하여 주행한다.
 #=============================================
 def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
-    global queue
+    pos = (x,y)
 
-    if distance(pos, P_END)>5:
-        drive(angle=0,speed=0)
+    if distance(pos, P_END) > 5:
+        drive(angle = 0, speed = 0)
         return
     
     if not queue:
-        drive(angle=0, speed=0)
+        drive(angle = 0, speed = 0)
         return
 
     s_pos = (x,y)
