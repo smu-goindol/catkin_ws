@@ -12,8 +12,9 @@ import pygame
 import rospy # type: ignore
 from xycar_msgs.msg import xycar_motor
 
-from goindol_types import Car, CarCurrentStatus
 from goindol_driver import CarDriver
+from goindol_types import CarStatus
+from goindol_util import yaw_fix
 
 #=============================================
 # 모터 토픽을 발행할 것임을 선언
@@ -22,16 +23,16 @@ motor_pub = rospy.Publisher('xycar_motor', xycar_motor, queue_size=1)
 xycar_msg = xycar_motor()
 
 #=============================================
-# 프로그램에서 사용할 변수, 저장공간 선언부
-#=============================================
-goindol_car_driver: CarDriver = None # 차량을 주행시키는 객체
-
-#=============================================
 # 프로그램에서 사용할 상수 선언부
 #=============================================
 AR = (1142, 62) # AR 태그의 위치
 P_ENTRY = (1036, 162) # 주차라인 진입 시점의 좌표
 P_END = (1129, 69) # 주차라인 끝의 좌표
+
+#=============================================
+# 프로그램에서 사용할 변수, 저장공간 선언부
+#=============================================
+car_driver = CarDriver(P_ENTRY, P_END)
 
 #=============================================
 # 모터 토픽을 발행하는 함수
@@ -50,14 +51,9 @@ def drive(angle, speed):
 # 경로를 리스트를 생성하여 반환한다.
 #=============================================
 def planning(sx, sy, syaw, max_acceleration, dt):
-    global goindol_car_driver
-
-    goindol_car_driver = CarDriver(Car(sx, sy, syaw), P_ENTRY, P_END)
-
-    path = goindol_car_driver.plan.path
-    print(path.shape, path[:min(5, len(path))])
-
-    return path[:,0], path[:,1]
+    init_status = CarStatus(sx, sy, yaw_fix(syaw), 0, max_acceleration, dt)
+    car_driver.make_plan(init_status)
+    return car_driver.plan.extract_x(), car_driver.plan.extract_y()
 
 #=============================================
 # 생성된 경로를 따라가는 함수
@@ -66,10 +62,8 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 # 각도와 속도를 결정하여 주행한다.
 #=============================================
 def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
-    curr = CarCurrentStatus(Car(x, y, yaw), velocity, max_acceleration, dt)
-    next = goindol_car_driver.drive(curr)
-
+    curr_status = CarStatus(x, y, yaw, velocity)
+    next_status = car_driver.drive(curr_status, max_acceleration, dt)
     color = (128, 128, 0)
-    pygame.draw.line(screen, color, curr.car.point, next.car.point)
-
-    drive(next.angle, next.speed)
+    pygame.draw.line(screen, color, curr_status.to_point(), next_status.to_point(), width=2)
+    drive(next_status.calc_angle(), next_status.velocity)
