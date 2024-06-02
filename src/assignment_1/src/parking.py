@@ -79,10 +79,12 @@ def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
 
     if distance(pos, P_END) <5:
         drive(angle=0, speed=0)
+        print("stop1")
         return
 
     if not queue:
         drive(angle=0, speed=0)
+        print("stop2")
         return
 
     if len(queue) < 10:
