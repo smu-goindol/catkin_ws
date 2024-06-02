@@ -12,6 +12,12 @@ def calc_dist(p1: Point, p2: Point) -> float:
 def calc_yaw(p1: Point, p2: Point) -> float:
     return math.degrees(math.atan2(p2[1] - p1[1], p2[0] - p1[0]))
 
+def yaw2angle(yaw: float) -> float:
+    return (yaw + 90) % 360
+
+def angle2yaw(angle: float) -> float:
+    return (angle - 90) % 360
+
 
 class CarDriver:
     plan: PathPlan
@@ -28,6 +34,7 @@ class CarDriver:
         start_yaw = (car.yaw + 90) % 360
         self.plan = PathPlan(car.point, start_yaw, self.end_pos, self.end_yaw)
         self.queue = deque(self.plan.path)
+        print("goindol car driver noticed planning has done.")
 
     def _prune_close_points(self, pos: Point):
         """Queue에서 충분히 가까운 점들을 제거합니다."""
@@ -57,8 +64,10 @@ class CarDriver:
             yaw = calc_yaw(spos, epos)
             speed = dist / status.dt
 
-            next_status.angle = ((status.car.yaw - yaw + 360) % 360) - 180
+            next_status.angle = yaw2angle(status.car.yaw - yaw)
             next_status.speed = min(status.max_velocity, speed)
+
+            print(f'planned to go {next_status.angle:.2f} degrees, {next_status.speed:.2f} speed.')
 
             if abs(next_status.angle) >= 90:
                 # 90도 이상 핸들을 꺾을 수 없으므로, 다시 경로를 갱신.
