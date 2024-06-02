@@ -55,6 +55,8 @@ def planning(sx, sy, syaw, max_acceleration, dt):
     goindol_car_driver = CarDriver(Car(sx, sy, syaw), P_ENTRY, P_END)
 
     path = goindol_car_driver.plan.path
+    print(path.shape, path[:min(5, len(path))])
+
     return path[:0], path[:1]
 
 #=============================================

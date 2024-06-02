@@ -41,7 +41,7 @@ class CarDriver:
         """
 
         # 충분히 가까운 점은 제거
-        self._prune_close_points(status.point)
+        self._prune_close_points(status.car.point)
 
         if len(self.queue) == 0:
             # 경로가 끝났을 때
@@ -50,7 +50,7 @@ class CarDriver:
         # 다음 점까지 점진적으로 수렴시켜보자
         next_status = CarNextStatus(*self.queue[0])
         while True:
-            spos = status.point
+            spos = status.car.point
             epos = self.queue[0]
 
             dist = calc_dist(spos, epos)
