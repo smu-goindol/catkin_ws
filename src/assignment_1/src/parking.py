@@ -57,7 +57,7 @@ def planning(sx, sy, syaw, max_acceleration, dt):
     path = goindol_car_driver.plan.path
     print(path.shape, path[:min(5, len(path))])
 
-    return path[:0], path[:1]
+    return path[:,0], path[:,1]
 
 #=============================================
 # 생성된 경로를 따라가는 함수
