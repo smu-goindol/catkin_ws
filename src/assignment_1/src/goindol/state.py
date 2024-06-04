@@ -71,7 +71,7 @@ class CarStateDiff:
         return (self.dx ** 2 + self.dy ** 2) ** 0.5
 
     def speed(self, dt: float) -> float:
-        return self.distance / dt
+        return self.distance() / dt
 
     def angle(self) -> float:
         """[-180, 180) 범위의 yaw값 변화량을 반환합니다."""
