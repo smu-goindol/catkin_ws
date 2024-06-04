@@ -57,6 +57,26 @@ class CarState:
             dt=self.dt
         )
 
+    def flip_horizontal(self) -> CarState:
+        return CarState(
+            x=self.x,
+            y=self.y,
+            yaw=(180 - self.yaw) % 360,
+            velocity=self.velocity,
+            max_acceleration=self.max_acceleration,
+            dt=self.dt
+        )
+
+    def flip_vertical(self) -> CarState:
+        return CarState(
+            x=self.x,
+            y=self.y,
+            yaw=(360 - self.yaw) % 360,
+            velocity=self.velocity,
+            max_acceleration=self.max_acceleration,
+            dt=self.dt
+        )
+
     def yaw_heading_to(self, point: Point) -> float:
         """현재 위치에서 point로 향하는 yaw값을 반환합니다."""
         return calc_yaw(self.point(), point)

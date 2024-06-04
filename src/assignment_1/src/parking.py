@@ -52,7 +52,7 @@ def drive(angle, speed):
 #=============================================
 def planning(sx, sy, syaw, max_acceleration, dt):
     global strategy
-    state = CarState(sx, sy, syaw, 0, max_acceleration, dt)
+    state = CarState(sx, sy, syaw, 0, max_acceleration, dt).rotate(90)
     strategy = ForwardStrategy.get_strategy(state, DEST_STATE)
     return strategy.get_path().get_x_points(), strategy.get_path().get_y_points()
 
@@ -63,7 +63,7 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 # 각도와 속도를 결정하여 주행한다.
 #=============================================
 def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
-    curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt)
+    curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt).flip_vertical()
     next_state = strategy.predict(curr_state)
     diff = next_state - curr_state
     drive(angle=diff.angle(), speed=diff.speed(dt))
