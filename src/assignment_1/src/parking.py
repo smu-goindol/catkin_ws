@@ -32,7 +32,9 @@ P_END = (1129, 69) # 주차라인 끝의 좌표
 # 프로그램에서 사용할 변수, 저장공간 선언부
 #=============================================
 DEST_STATE = CarState.from_point(P_ENTRY, yaw=calc_yaw(P_ENTRY, P_END))
-COLOR = (128, 128, 0)
+COLOR_R = (255, 0, 0)
+COLOR_G = (0, 255, 0)
+COLOR_B = (0, 0, 255)
 strategy: Strategy
 
 #=============================================
@@ -78,6 +80,8 @@ def _yaw_fix(yaw: float) -> float:
 def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
     curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt)
     next_state = strategy.predict(curr_state)
-    pygame.draw.line(screen, COLOR, curr_state.point(), next_state.point(), width=2)
     diff = next_state - curr_state
+    pygame.draw.circle(screen, COLOR_G, next_state.point(), 5)
+    pygame.draw.line(screen, COLOR_G, curr_state.point(), next_state.point(), width=2)
+    pygame.draw.line(screen, COLOR_R, curr_state.point(), curr_state.rotate(-diff.angle()).move(diff.speed(dt)).point(), width=2)
     drive(angle=diff.angle(), speed=diff.speed(dt))
