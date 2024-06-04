@@ -1,7 +1,7 @@
 from typing import *
 
 from .path import *
-from .point import Point
+from .point import *
 from .state import CarState
 
 
@@ -54,7 +54,7 @@ class AbstractStrategy(Strategy):
     def get_queue(self) -> PathQueue:
         return self._queue
 
-    def has_arrived(self, state: CarState, point: Point = None, epsilon=10) -> bool:
+    def has_arrived(self, state: CarState, point: Point = None, epsilon=64) -> bool:
         if point is None:
             dst_state = self._dst_state
         else:
@@ -81,15 +81,17 @@ class ForwardStrategy(AbstractStrategy):
 
     def predict(self, state: CarState) -> CarState:
         # 주차라인 끝에 충분히 가까워졌을때 주차라인 끝에 멈추도록 합니다.
-        if self.has_arrived(state):
+        if self.has_arrived(state, epsilon=20):
             return self.get_dst_state()
-        _filter = lambda p: not self.has_arrived(state, p, epsilon=40)
+
+        _filter = lambda p: not self.has_arrived(state, p)
         if (next_point := self.get_queue().front(_filter)) is None:
             return self.get_dst_state()
+
         # 다음 점으로 가기위한 상태를 반환한다.
-        next_status = CarState.from_point(next_point)
+        next_status = CarState.from_point(next_point, yaw=calc_yaw(state.point(), next_point))
         diff = next_status - state
-        # 90도 이상 핸들을 꺾을 수 없으므로, 다시 경로를 갱신할 준비.
-        if abs(diff.angle()) > 90:
+        # 60도 이상 핸들을 꺾을 수 없으므로, 다시 경로를 갱신할 준비.
+        if abs(diff.angle()) > 60:
             self.__init__(state, self.get_dst_state())
         return next_status
