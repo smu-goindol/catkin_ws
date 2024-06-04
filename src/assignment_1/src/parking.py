@@ -66,7 +66,7 @@ def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
     curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt).flip_vertical()
     next_state = strategy.predict(curr_state)
     diff = next_state - curr_state
-    drive(angle=diff.angle(), speed=diff.speed(dt))
+    drive(angle=diff.angle(), speed=next_state.velocity)
 
     # 시각화
     curr_state.draw(screen)

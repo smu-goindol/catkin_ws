@@ -79,7 +79,10 @@ class ForwardStrategy(AbstractStrategy):
 
         # 다음으로 방문할 좌표가 없다면, 목적지로 이동
         if not self._queue:
-            return self.get_dst_state()
+            next_state = self.get_dst_state().move(100).rotate(180)
+            # 주차라인 끝에 충분히 가까워졌을때 주차라인 끝에 멈추도록 합니다.
+            next_state.velocity = max(0.5 * calc_distance(state.point(), next_state.point()) - 5, 0)
+            return next_state
 
         # 다음으로 방문할 좌표가 차량의 방향과 일치하지 않는다면, 다시 경로를 설정
         if not state.is_heading_to(next_point):
@@ -87,8 +90,10 @@ class ForwardStrategy(AbstractStrategy):
             return state
 
         # 회전 중이면 속도를 점점 줄임 (cos 가 1이면 직진 중 -> 살짝 가속)
-        next_velocity = state.velocity * 1.2 * state.cos_heading_to(next_point)
+        next_velocity = max(state.velocity * (1.4 * state.cos_heading_to(next_point)) ** 4, 16)
         next_velocity = min(next_velocity, state.max_velocity())
+
+        print("velocity: ", next_velocity)
 
         next_state = CarState(
             x=next_point[0],
