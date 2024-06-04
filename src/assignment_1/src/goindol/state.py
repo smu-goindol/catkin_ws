@@ -81,10 +81,13 @@ class CarState:
         """현재 위치에서 point로 향하는 yaw값을 반환합니다."""
         return calc_yaw(self.point(), point)
 
+    def cos_heading_to(self, point: Point) -> float:
+        """현재 위치에서 point로 향하는 방향의 cos값을 반환합니다."""
+        return math.cos(math.radians(self.yaw_heading_to(point) - self.yaw))
+
     def is_heading_to(self, point: Point) -> bool:
         """현재 위치에서 point로 향하는지 여부를 반환합니다."""
-        yaw = self.yaw_heading_to(point)
-        return math.cos(math.radians(self.yaw - yaw)) > 0.5
+        return self.cos_heading_to(point) >= 0.5 # 60 degrees
 
     def draw(self, surface: pygame.Surface):
         COLOR_X_AXIS = (0,0,255)
