@@ -1,8 +1,8 @@
-from collections import deque
 from typing import *
 from math import comb
 
 import numpy as np
+import pygame
 
 from .point import Point
 
@@ -28,35 +28,9 @@ class Path:
         """Return the y-coordinates of the points of the curve."""
         ...
 
-
-class PathQueue:
-    def __init__(self, path: Path):
-        self._path = path
-        self._queue = deque(path.get_points())
-
-    def get_path(self) -> Path:
-        """Return the path."""
-        return self._path
-
-    def get_queue(self) -> Deque[Point]:
-        """Return the queue of points in the path."""
-        return self._queue
-
-    def front(self, key: Callable[[Point], bool] = None) -> Optional[Point]:
-        """Return the front of the queue."""
-        self._prune(key)
-        return self._queue[0] if self._queue else None
-
-    def dequeue(self, key: Callable[[Point], bool] = None) -> Optional[Point]:
-        """Dequeue the path until the car has arrived at the next point."""
-        self._prune(key)
-        return self._queue.popleft() if self._queue else None
-
-    def _prune(self, key: Callable[[Point], bool]):
-        if key is not None:
-            while self._queue and not key(self._queue[0]):
-                self._queue.popleft()
-
+    def draw(self, surface: pygame.Surface) -> None:
+        """Draw the curve on the surface."""
+        ...
 
 
 class AbstractPath(Path):
@@ -78,6 +52,10 @@ class AbstractPath(Path):
 
     def get_y_points(self) -> List[float]:
         return self._points[:, 1].tolist()
+
+    def draw(self, surface: pygame.Surface) -> None:
+        LINE_COLOR = (0, 255, 0)
+        pygame.draw.lines(surface, LINE_COLOR, False, self.get_points(), width=2)
 
 
 class BezierCurve(AbstractPath):

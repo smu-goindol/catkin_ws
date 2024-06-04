@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 
-from .point import Point
+import pygame
+
+from .point import *
 
 
 @dataclass
@@ -18,10 +20,6 @@ class CarState:
     velocity: float = 0
     max_acceleration: float = 0
     dt: float = 0
-
-    @classmethod
-    def from_point(cls, point: Point, yaw: float = 0, velocity: float = 0, max_acceleration: float = 0, dt: float = 0) -> CarState:
-        return cls(x=point[0], y=point[1], yaw=yaw, velocity=velocity, max_acceleration=max_acceleration, dt=dt)
 
     def __sub__(self, other: CarState) -> CarStateDiff:
         return CarStateDiff(
@@ -49,6 +47,7 @@ class CarState:
         )
 
     def rotate(self, angle: float) -> CarState:
+        """반시계방향으로 회전"""
         return CarState(
             x=self.x,
             y=self.y,
@@ -57,6 +56,27 @@ class CarState:
             max_acceleration=self.max_acceleration,
             dt=self.dt
         )
+
+    def yaw_heading_to(self, point: Point) -> float:
+        """현재 위치에서 point로 향하는 yaw값을 반환합니다."""
+        return calc_yaw(self.point(), point)
+
+    def is_heading_to(self, point: Point) -> bool:
+        """현재 위치에서 point로 향하는지 여부를 반환합니다."""
+        yaw = self.yaw_heading_to(point)
+        return math.cos(math.radians(self.yaw - yaw)) > 0.5
+
+    def draw(self, surface: pygame.Surface):
+        COLOR_X_AXIS = (0,0,255)
+        COLOR_Y_AXIS = (255,0,0)
+        LENGTH_X_AXIS = 25
+        LENGTH_Y_AXIS = 75
+        pygame.draw.circle(surface, COLOR_X_AXIS, self.rotate(0).move(LENGTH_X_AXIS).point(), radius=5)
+        pygame.draw.line(surface, COLOR_X_AXIS, self.point(), self.rotate(0).move(LENGTH_X_AXIS).point(), width=2)
+        pygame.draw.line(surface, COLOR_X_AXIS, self.point(), self.rotate(180).move(LENGTH_X_AXIS).point(), width=2)
+        pygame.draw.circle(surface, COLOR_Y_AXIS, self.rotate(90).move(LENGTH_Y_AXIS).point(), radius=5)
+        pygame.draw.line(surface, COLOR_Y_AXIS, self.point(), self.rotate(90).move(LENGTH_Y_AXIS).point(), width=2)
+        pygame.draw.line(surface, COLOR_Y_AXIS, self.point(), self.rotate(270).move(LENGTH_Y_AXIS).point(), width=2)
 
 
 @dataclass

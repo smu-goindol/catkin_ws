@@ -31,10 +31,7 @@ P_END = (1129, 69) # 주차라인 끝의 좌표
 #=============================================
 # 프로그램에서 사용할 변수, 저장공간 선언부
 #=============================================
-DEST_STATE = CarState.from_point(P_ENTRY, yaw=calc_yaw(P_ENTRY, P_END))
-COLOR_R = (255, 0, 0)
-COLOR_G = (0, 255, 0)
-COLOR_B = (0, 0, 255)
+DEST_STATE = CarState(x=P_ENTRY[0], y=P_ENTRY[1], yaw=calc_yaw(P_ENTRY, P_END))
 strategy: Strategy
 
 #=============================================
@@ -55,21 +52,9 @@ def drive(angle, speed):
 #=============================================
 def planning(sx, sy, syaw, max_acceleration, dt):
     global strategy
-    state = CarState(sx, sy, _yaw_fix(syaw), 0, max_acceleration, dt)
+    state = CarState(sx, sy, syaw, 0, max_acceleration, dt)
     strategy = ForwardStrategy.get_strategy(state, DEST_STATE)
-    path = strategy.get_path()
-    return path.get_x_points(), path.get_y_points()
-
-def _yaw_fix(yaw: float) -> float:
-    """planning에서 주어지는 Yaw는 y-positive 방향이 0도이다.
-    이를 x-positive 방향이 0도인 yaw로 변환한다.
-
-    (그래야 삼각함수를 사용할 때 편하다)
-    """
-    yaw = (yaw + 90) % 360
-    if yaw > 180:
-        yaw -= 360
-    return yaw
+    return strategy.get_path().get_x_points(), strategy.get_path().get_y_points()
 
 #=============================================
 # 생성된 경로를 따라가는 함수
@@ -81,7 +66,9 @@ def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
     curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt)
     next_state = strategy.predict(curr_state)
     diff = next_state - curr_state
-    pygame.draw.circle(screen, COLOR_G, next_state.point(), 5)
-    pygame.draw.line(screen, COLOR_G, curr_state.point(), next_state.point(), width=2)
-    pygame.draw.line(screen, COLOR_R, curr_state.point(), curr_state.rotate(-diff.angle()).move(diff.speed(dt)).point(), width=2)
     drive(angle=diff.angle(), speed=diff.speed(dt))
+
+    # 시각화
+    curr_state.draw(screen)
+    next_state.draw(screen)
+    strategy.get_path().draw(screen)

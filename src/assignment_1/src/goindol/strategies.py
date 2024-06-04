@@ -1,3 +1,4 @@
+from collections import deque
 from typing import *
 
 from .path import *
@@ -22,14 +23,6 @@ class Strategy:
         """Return the path of the strategy."""
         ...
 
-    def get_queue(self) -> PathQueue:
-        """Return the queue of points in the path."""
-        ...
-
-    def has_arrived(self, state: CarState) -> bool:
-        """Check if the car has arrived at the destination."""
-        ...
-
     def predict(self, state: CarState) -> CarState:
         """Predict the next state of the car."""
         ...
@@ -40,7 +33,7 @@ class AbstractStrategy(Strategy):
         self._src_state = src_state
         self._dst_state = dst_state
         self._path = path
-        self._queue = PathQueue(path)
+        print(f'path initialized @ {src_state.point()}')
 
     def get_src_state(self) -> CarState:
         return self._src_state
@@ -50,16 +43,6 @@ class AbstractStrategy(Strategy):
 
     def get_path(self) -> Path:
         return self._path
-
-    def get_queue(self) -> PathQueue:
-        return self._queue
-
-    def has_arrived(self, state: CarState, point: Point = None, epsilon=64) -> bool:
-        if point is None:
-            dst_state = self._dst_state
-        else:
-            dst_state = CarState.from_point(point)
-        return (dst_state - state).distance() < epsilon
 
     def predict(self, state: CarState) -> CarState:
         raise NotImplementedError
@@ -76,22 +59,39 @@ class ForwardStrategy(AbstractStrategy):
             src_state.move(320).point(),
             dst_state.rotate(180).move(320).point(),
             dst_state.point(),
+            samples=200,
         )
-        return super().__init__(src_state, dst_state, path)
+        super().__init__(src_state, dst_state, path)
+        self._queue = deque(path.get_points())
 
     def predict(self, state: CarState) -> CarState:
-        # 주차라인 끝에 충분히 가까워졌을때 주차라인 끝에 멈추도록 합니다.
-        if self.has_arrived(state, epsilon=20):
+        EPSILON = 20
+
+        # TODO: 주차라인 끝에 충분히 가까워졌을때 주차라인 끝에 멈추도록 합니다.
+
+        # 다음으로 방문할 좌표 선정
+        while self._queue:
+            next_point = self._queue.popleft()
+            if calc_distance(state.point(), next_point) > EPSILON:
+                self._queue.appendleft(next_point)
+                break
+
+        # 다음으로 방문할 좌표가 없다면, 목적지로 이동
+        if not self._queue:
             return self.get_dst_state()
 
-        _filter = lambda p: not self.has_arrived(state, p)
-        if (next_point := self.get_queue().front(_filter)) is None:
-            return self.get_dst_state()
-
-        # 다음 점으로 가기위한 상태를 반환한다.
-        next_status = CarState.from_point(next_point, yaw=calc_yaw(state.point(), next_point))
-        diff = next_status - state
-        # 60도 이상 핸들을 꺾을 수 없으므로, 다시 경로를 갱신할 준비.
-        if abs(diff.angle()) > 60:
+        # 다음으로 방문할 좌표가 차량의 방향과 일치하지 않는다면, 다시 경로를 설정
+        if not state.is_heading_to(next_point):
             self.__init__(state, self.get_dst_state())
-        return next_status
+            return state
+
+        next_state = CarState(
+            x=next_point[0],
+            y=next_point[1],
+            yaw=calc_yaw(state.point(), next_point),
+            velocity=state.velocity,
+            max_acceleration=state.max_acceleration,
+            dt=state.dt,
+        )
+
+        return next_state
