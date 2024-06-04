@@ -74,5 +74,8 @@ class CarStateDiff:
         return self.distance() / dt
 
     def angle(self) -> float:
-        """[-180, 180) 범위의 yaw값 변화량을 반환합니다."""
-        return (self.dyaw + 180) % 360 - 180
+        """(-180, 180] 범위의 yaw값 변화량을 반환합니다.
+
+        시계방향으로 회전할 경우 양수의 값을 가집니다.
+        """
+        return -((self.dyaw + 180) % 360 - 180)
