@@ -1,7 +1,7 @@
-from point import *
-from path import *
-from state import *
-from strategies import *
+from .point import *
+from .path import *
+from .state import *
+from .strategies import *
 
 
 __all__ = [

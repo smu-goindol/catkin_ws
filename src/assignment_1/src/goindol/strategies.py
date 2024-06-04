@@ -1,8 +1,8 @@
 from typing import *
 
-from path import *
-from point import Point
-from state import CarState
+from .path import *
+from .point import Point
+from .state import CarState
 
 
 class Strategy:

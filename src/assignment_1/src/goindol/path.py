@@ -4,7 +4,7 @@ from math import comb
 
 import numpy as np
 
-from point import Point
+from .point import Point
 
 
 class Path:
