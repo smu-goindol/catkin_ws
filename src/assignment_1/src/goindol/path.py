@@ -53,10 +53,9 @@ class PathQueue:
         return self._queue.popleft() if self._queue else None
 
     def _prune(self, key: Callable[[Point], bool]):
-        if key is None:
-            return
-        while self._queue and not key(self._queue[0]):
-            self._queue.popleft()
+        if key is not None:
+            while self._queue and not key(self._queue[0]):
+                self._queue.popleft()
 
 
 
