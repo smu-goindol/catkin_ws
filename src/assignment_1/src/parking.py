@@ -12,9 +12,8 @@ import pygame
 import rospy # type: ignore
 from xycar_msgs.msg import xycar_motor
 
-from goindol_driver import CarDriver
-from goindol_types import CarStatus
-from goindol_util import yaw_fix
+from goindol import *
+
 
 #=============================================
 # 모터 토픽을 발행할 것임을 선언
@@ -32,7 +31,9 @@ P_END = (1129, 69) # 주차라인 끝의 좌표
 #=============================================
 # 프로그램에서 사용할 변수, 저장공간 선언부
 #=============================================
-car_driver = CarDriver(P_ENTRY, P_END)
+DEST_STATE = CarState.from_point(P_ENTRY, yaw=calc_yaw(P_ENTRY, P_END))
+COLOR = (128, 128, 0)
+strategy: Strategy
 
 #=============================================
 # 모터 토픽을 발행하는 함수
@@ -51,9 +52,22 @@ def drive(angle, speed):
 # 경로를 리스트를 생성하여 반환한다.
 #=============================================
 def planning(sx, sy, syaw, max_acceleration, dt):
-    init_status = CarStatus(sx, sy, yaw_fix(syaw), 0, max_acceleration, dt)
-    car_driver.make_plan(init_status)
-    return car_driver.plan.extract_x(), car_driver.plan.extract_y()
+    global strategy
+    state = CarState(sx, sy, _yaw_fix(syaw), 0, max_acceleration, dt)
+    strategy = ForwardStrategy.get_strategy(state, DEST_STATE)
+    path = strategy.get_path()
+    return path.get_x_points(), path.get_y_points()
+
+def _yaw_fix(yaw: float) -> float:
+    """planning에서 주어지는 Yaw는 y-positive 방향이 0도이다.
+    이를 x-positive 방향이 0도인 yaw로 변환한다.
+
+    (그래야 삼각함수를 사용할 때 편하다)
+    """
+    yaw = (yaw + 90) % 360
+    if yaw > 180:
+        yaw -= 360
+    return yaw
 
 #=============================================
 # 생성된 경로를 따라가는 함수
@@ -62,8 +76,8 @@ def planning(sx, sy, syaw, max_acceleration, dt):
 # 각도와 속도를 결정하여 주행한다.
 #=============================================
 def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
-    curr_status = CarStatus(x, y, yaw, velocity)
-    next_status = car_driver.drive(curr_status, max_acceleration, dt)
-    color = (128, 128, 0)
-    pygame.draw.line(screen, color, curr_status.to_point(), next_status.to_point(), width=2)
-    drive(next_status.calc_angle(), next_status.velocity)
+    curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt)
+    next_state = strategy.predict(curr_state)
+    pygame.draw.line(screen, COLOR, curr_state.point(), next_state.point(), width=2)
+    diff = next_state - curr_state
+    drive(angle=diff.angle(), speed=diff.speed(dt))
