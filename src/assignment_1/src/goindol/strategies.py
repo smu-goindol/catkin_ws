@@ -83,7 +83,8 @@ class ForwardStrategy(AbstractStrategy):
         # 주차라인 끝에 충분히 가까워졌을때 주차라인 끝에 멈추도록 합니다.
         if self.has_arrived(state):
             return self.get_dst_state()
-        if (next_point := self.get_queue().front(lambda p: not self.has_arrived(state, p))) is None:
+        _filter = lambda p: not self.has_arrived(state, p, epsilon=40)
+        if (next_point := self.get_queue().front(_filter)) is None:
             return self.get_dst_state()
         # 다음 점으로 가기위한 상태를 반환한다.
         next_status = CarState.from_point(next_point)
