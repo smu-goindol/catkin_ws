@@ -10,32 +10,26 @@ from .point import Point
 class Path:
     ## 곡선의 길이 반환.
     def __len__(self) -> int:
-        """Return the length of the curve."""
         ...
         
     ## 곡선을 순회하는 iterator 반환.
     def __iter__(self) -> Iterable:
-        """Return an iterator over the points of the curve."""
         ...
         
     ## 곡선의 모든 점들을 numpy 배열로 반환.
     def get_points(self) -> np.ndarray:        
-        """Return the points of the curve."""
         ...
         
     ## 곡선의 x좌표를 리스트로 반환.
     def get_x_points(self) -> List[float]:
-        """Return the x-coordinates of the points of the curve."""
         ...
         
     ## 곡선의 y좌표를 리스트로 반환.
     def get_y_points(self) -> List[float]:       
-        """Return the y-coordinates of the points of the curve."""
         ...
         
     ## pygame 화면에 곡선 그리기.
     def draw(self, surface: pygame.Surface) -> None:
-        """Draw the curve on the surface."""
         ...
 
 
