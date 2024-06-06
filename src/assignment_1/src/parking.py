@@ -30,7 +30,7 @@ P_END = (1129, 69) # 주차라인 끝의 좌표
 
 #=============================================
 # 프로그램에서 사용할 변수, 저장공간 선언부
-# 주차라인 진입 시점의 위치와 주차라인 끝 지점을 향하는 방향을 나타내는 Carstate 객체를 이용함.
+# 주차라인 진입 시점의 위치와 주차라인 끝 지점을 향하는 방향을 나타내는 Carstate 객체를 이용.
 # 차량의 목적지를 나타내는 데 쓰임.
 #=============================================
 DEST_STATE = CarState(x=P_ENTRY[0], y=P_ENTRY[1], yaw=calc_yaw(P_ENTRY, P_END)) 
@@ -58,33 +58,14 @@ def planning(sx, sy, syaw, max_acceleration, dt):
     global strategy
 
     ## Carstate 를 사용하여 시작 상태 생성 후 방향 90도 회전.
+    ## planning 함수와 tracking 함수에서의 x축(y축)이 90도만큼 차이 발생.
     state = CarState(sx, sy, syaw, 0, max_acceleration, dt).rotate(90)
     ## 시작 상태와 DEST_STATE를 기반으로 전략 결정. 결정된 경로를 x,y좌표로 반환.
     strategy = ForwardStrategy.get_strategy(state, DEST_STATE)
     ## 전략의 주행 경로를 가져와 반환, x좌표와 y좌표를 반환.
     return strategy.get_path().get_x_points(), strategy.get_path().get_y_points()
 
-#=============================================
-# 생성된 경로를 따라가는 함수
-# 파이게임 screen, 현재위치 x,y 현재각도, yaw
-# 현재속도 velocity, 최대가속도 max_acceleration 단위시간 dt 를 전달받고
-# 각도와 속도를 결정하여 주행한다.
-#=============================================
-def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
-    
-    ## 현재의 차량 상태를 수직으로 반전시킴.
-    curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt).flip_vertical()
-    ## 전략을 기반으로 현재 상태에서 다음 상태를 예측.
-    next_state = strategy.predict(curr_state)
-    ## 현재와 다음 상태의 차이에서 angle()을 호출하여 차량이 회전해야 하는 각도 계산.
-    ## 예측한 다음 상로 이동할 때의 속도 지정.
-    diff = next_state - curr_state
-    drive(angle=diff.angle(), speed=next_state.velocity)
-
-    #=============================================
-    # 차의 범퍼 방향쪽으로 앞 빨간색 막대기는 예측한 다음 상태의 위치.
-    # 차의 범퍼 방향쪽으로 뒤 빨간색 막대기는 현재 상태의 위치.
-    # 전략에 해당하는 주행 경로를 시각화하기 위해 메서드를 호출하여 screen에 그림.
+#=============================================기.
     #=============================================
     curr_state.draw(screen)
     next_state.draw(screen)
