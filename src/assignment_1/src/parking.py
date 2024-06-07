@@ -65,7 +65,26 @@ def planning(sx, sy, syaw, max_acceleration, dt):
     ## 전략의 주행 경로를 가져와 반환, x좌표와 y좌표를 반환.
     return strategy.get_path().get_x_points(), strategy.get_path().get_y_points()
 
-#=============================================기.
+#=============================================
+# 생성된 경로를 따라가는 함수
+# 파이게임 screen, 현재위치 x,y 현재각도, yaw
+# 현재속도 velocity, 최대가속도 max_acceleration 단위시간 dt 를 전달받고
+# 각도와 속도를 결정하여 주행한다.
+#=============================================
+def tracking(screen: pygame.Surface, x, y, yaw, velocity, max_acceleration, dt):
+    ## 현재의 차량 상태를 수직으로 반전시킴.
+    curr_state = CarState(x, y, yaw, velocity, max_acceleration, dt).flip_vertical()
+    ## 전략을 기반으로 현재 상태에서 다음 상태를 예측.
+    next_state = strategy.predict(curr_state)
+    ## 현재와 다음 상태의 차이에서 angle()을 호출하여 차량이 회전해야 하는 각도 계산.
+    ## 예측한 다음 상로 이동할 때의 속도 지정.
+    diff = next_state - curr_state
+    drive(angle=diff.angle(), speed=next_state.velocity)
+
+    #=============================================
+    # 차의 범퍼 방향쪽으로 앞 빨간색 막대기는 예측한 다음 상태의 위치.
+    # 차의 범퍼 방향쪽으로 뒤 빨간색 막대기는 현재 상태의 위치.
+    # 전략에 해당하는 주행 경로를 시각화하기 위해 메서드를 호출하여 screen에 그림.
     #=============================================
     curr_state.draw(screen)
     next_state.draw(screen)
